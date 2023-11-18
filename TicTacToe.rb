@@ -1,21 +1,5 @@
-# class TicTacToe
-#  def initialize
-#      @board = [nil, nil, nil, nil, nil, nil, nil, nil, nil,]
-#      @players = []
-#  end
-#  def players
-#    return @players
-#  end
-#  def board
-#    return @board
-#  end
-# end
-# game=TicTacToe.new
-# puts game.players
-# puts game.board
-
 class TicTacToe
-    attr_reader :players,:board
+    attr_reader :players,:board,:current_player
     def initialize
         @board = [nil, nil, nil, 
         nil, nil, nil,
@@ -23,13 +7,90 @@ class TicTacToe
         @players = []
     end
     def start
-        add_player
-        add_player
+        if players.length !=2
+            raise StandardError, "Two players are required to play"
+        end
+        @current_player=players.first
+        render
+        until (win? || draw?) do
+            get_input
+            render
+            switch_player
+        end
+        if (winner = win?)
+            puts "Congratulations, #{winner.name}! You Won!"
+        else 
+            puts "It was a draw"
+        end
     end
-    def add_player
+    def switch_player
+        @current_player=(current_player == players.first) ? players.last : players.first
+    end
+    def get_input
+        loop do
+            puts "#{current_player.name}, where would you like to go? [1-9]"
+            location = gets.chomp.to_i
+
+            if board[location -1] ==nil
+                 board[location -1] = current_player
+            break
+            else
+             puts "That spot is already taken"
+                end
+        end
+    end
+    def render
+        puts
+        puts "#{board[0]&.mark || " "} | #{board[1]&.mark || " "} | #{board[2]&.mark || " "}"
+        puts "*********"
+        puts "#{board[3]&.mark || " "} | #{board[4]&.mark || " "} | #{board[5]&.mark || " "}"
+        puts "*********"
+        puts "#{board[6]&.mark || " "} | #{board[7]&.mark || " "} | #{board[8]&.mark || " "}"
+        puts "*********"
+        puts
+    end
+    def win?
+        # @board.each_slice(3) do |row|
+        #     p row
+        # end
+        #Horizontals
+        row = [board[0],board[1],board[2]].compact
+        return row.first if row.length == 3 && row.all? {|r| r == row.first }
+
+        row = [board[3],board[4],board[5]].compact
+        return row.first if row.length == 3 && row.all? {|r| r == row.first }
+
+        row = [board[6],board[7],board[8]].compact
+        return row.first if row.length == 3 && row.all? {|r| r == row.first }
+
+        # Vertical
+        row = [board[0],board[3],board[6]].compact
+        return row.first if row.length == 3 && row.all? {|r| r == row.first }
+
+        row = [board[1],board[4],board[7]].compact
+        return row.first if row.length == 3 && row.all? {|r| r == row.first }
+
+        row = [board[2],board[5],board[8]].compact
+        return row.first if row.length == 3 && row.all? {|r| r == row.first }
+
+        #Diagonals
+        row = [board[2],board[4],board[6]].compact
+        return row.first if row.length == 3 && row.all? {|r| r == row.first }
+
+        row = [board[0],board[4],board[8]].compact
+        return row.first if row.length == 3 && row.all? {|r| r == row.first }
+
+        false
+    end
+    def draw?
+        board.none?(nil) && !win?
+    end
+    def add_player(name=nil)
         mark = players.empty? ? "X": "O"
-        puts "What is your name?"
-        name=gets.chomp
+        if name==nil
+            puts "What is your name?"
+            name=gets.chomp
+        end
         players << Players.new(name, mark)
     end
 end 
@@ -41,7 +102,9 @@ class Players
         @mark=mark
     end
 end
+
 game=TicTacToe.new
+game.add_player("chris")
+game.add_player("bob")
 game.start
-p game.players
-# p game.board
+
